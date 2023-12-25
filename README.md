@@ -10,13 +10,44 @@ The Instagram Video Fetche API is a Flask-based web service that provides an eff
 
 ## Getting Started
 
+### Running with Docker
+
+For ease of deployment, the Instagram Video Fetcher API can also be run as a Docker container. This section is intended for end users who wish to run the application without setting up the entire development environment.
+
+#### Prerequisites
+- Docker
+
+#### Pulling and Running the Docker Image
+
+1. Pull the Docker Image: 
+Download the latest image of the Instagram Video Fetcher API from Docker Hub:
+
+```bash
+docker pull ornob011/instagram-fetcher:latest
+```
+
+2. Run the Docker Container:
+Start the application by running the following command:
+
+```bash
+docker run -p 5000:5000 ornob011/instagram-fetcher:latest
+```
+
+This command runs the container and maps port 5000 of the container to port 5000 on your host machine, allowing you to access the API via http://localhost:5000.
+
+#### Accessing the Application
+
+Once the container is running, you can access the Instagram Video Fetcher API at `http://localhost:5000`. Use the API endpoint as described in the [below sections](#using-the-api) to fetch video information from Instagram posts.
+
+
+### Running with Python
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites
+#### Prerequisites
 
 - Python 3.8 or higher
 
-### Installation
+#### Installation
 
 1. **Clone the Repository**:
    Clone this repository to your local machine using:
@@ -30,7 +61,7 @@ These instructions will get you a copy of the project up and running on your loc
     pip install -r requirements.txt
     ```
 
-### Running the Application
+#### Running the Application
 
 Run the application with the following command:
 
@@ -41,16 +72,16 @@ python app.py
 The Flask server will start at http://127.0.0.1:5000/.
 
 
-### Using the API
-#### Endpoint: Get Video Informations
+#### Using the API
+##### Endpoint: Get Video Informations
 
 - URL: /api/video
 - Method: GET
 - URL Params:
     - Required: url=[string] (The Instragram video URL)
 
-### Testing the Endpoint
-#### Via Web Browser
+#### Testing the Endpoint
+##### Via Web Browser
 
 To test the endpoint via a web browser, simply navigate to the following URL (replace <Instragram_Video_URL> with the actual Instragram video URL):
 
@@ -64,7 +95,7 @@ For example:
 http://127.0.0.1:5000/api/video?url=https://www.instagram.com/reel/C09D1y4pEQz/?utm_source=ig_web_copy_link%26igshid=MzRlODBiNWFlZA%3D%3D
 ```
 
-#### Via cURL
+##### Via cURL
 
 You can also use cURL in your command line:
 
@@ -72,7 +103,7 @@ You can also use cURL in your command line:
 curl "http://127.0.0.1:5000/api/video?url=https://www.instagram.com/reel/C09D1y4pEQz/?utm_source=ig_web_copy_link%26igshid=MzRlODBiNWFlZA%3D%3D"
 ```
 
-#### Via Postman
+##### Via Postman
 
 1. Open Postman: Launch the Postman application on your computer.
 
@@ -102,7 +133,7 @@ Here's an illustration of what your Postman setup might look like:
     - Key: `url`
     - Value: https://www.instagram.com/reel/C09D1y4pEQz/?utm_source=ig_web_copy_link%26igshid=MzRlODBiNWFlZA%3D%3D
 
-#### Sample Response For Single Video:
+##### Sample Response For Single Video:
 
 The API responds with a JSON object containing the filename, width, height and download link of the video:
 
@@ -118,7 +149,7 @@ The API responds with a JSON object containing the filename, width, height and d
 ]
 ```
 
-#### Sample Response For Mutiple Videos:
+##### Sample Response For Mutiple Videos:
 
 The API responds with a JSON object containing the filename, width, height and download link of the videos:
 
