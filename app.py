@@ -5,6 +5,7 @@ import re
 from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 from flask import Flask, request, jsonify
+from collections import OrderedDict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,17 +18,30 @@ def format_graphql_json(post_json):
     data = post_json.get('data', {}).get('xdt_shortcode_media', {})
     if not data:
         raise ValueError("This post does not exist")
+
+    # Handling multiple videos in a carousel post
+    if 'edge_sidecar_to_children' in data:
+        videos = []
+        for index, edge in enumerate(data['edge_sidecar_to_children']['edges'], start=1):
+            node = edge['node']
+            if node.get('is_video'):
+                videos.append(extract_video_info(node, index))
+        return videos
+
+    # Single video post
     if not data.get('is_video'):
         raise ValueError("This post is not a video")
+    return [extract_video_info(data, 1)]
 
-    filename = f"ig-video-{data.get('id')}.mp4"
-    video_json = {
-        'filename': filename,
-        'width': str(data.get('dimensions', {}).get('width', '')),
-        'height': str(data.get('dimensions', {}).get('height', '')),
-        'videoUrl': data.get('video_url', '')
-    }
-    return video_json
+
+def extract_video_info(video_data, index):
+    return OrderedDict([
+        ('index', index),
+        ('filename', f"ig-video-{video_data.get('id')}.mp4"),
+        ('height', str(video_data.get('dimensions', {}).get('height', ''))),
+        ('width', str(video_data.get('dimensions', {}).get('width', ''))),
+        ('videoUrl', video_data.get('video_url', ''))
+    ])
 
 
 def encode_post_request_data(shortcode):
@@ -125,20 +139,24 @@ def fetch_from_page(post_id, timeout=5):
         
 
 def format_page_json(post_html):
-    video_element = post_html.find('meta', property='og:video')
-    if not video_element:
+    video_elements = post_html.find_all('video')
+    if not video_elements:
         return None
-    video_url = video_element.get('content')
-    if not video_url:
-        return None
-    width = post_html.find('meta', property='og:video:width').get('content', '')
-    height = post_html.find('meta', property='og:video:height').get('content', '')
-    return {
-        'filename': f"ig-video-{width}x{height}.mp4",
-        'width': width,
-        'height': height,
-        'videoUrl': video_url
-    }
+
+    videos = []
+    for index, video in enumerate(video_elements, start=1):
+        video_url = video.get('src')
+        if video_url:
+            video_json = OrderedDict([
+                ('index', index),
+                ('filename', f"ig-video-{index}.mp4"),
+                ('height', video.get('height', '')),
+                ('width', video.get('width', '')),
+                ('videoUrl', video_url)
+            ])
+            videos.append(video_json)
+
+    return videos
 
 
 def get_post_id(post_url):
